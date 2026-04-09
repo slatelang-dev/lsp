@@ -1,0 +1,53 @@
+module diagnostics;
+
+use slate;
+use rpc;
+
+string lsp_range(int line, int col, int length) {
+    string start_line = string(line - 1);
+    string start_col = string(col - 1);
+    string end_col = string(col - 1 + length);
+    return "{\"start\":{\"line\":" + start_line + ",\"character\":" + start_col + "},\"end\":{\"line\":" + start_line + ",\"character\":" + end_col + "}}";
+}
+
+string lsp_diagnostic(AnalysisError err) {
+    string range = lsp_range(err.location.line, err.location.col, err.location.length);
+    return "{\"range\":" + range + ",\"severity\":1,\"code\":\"Error\",\"message\":\"" + err.message + "\"}";
+}
+
+string lsp_warning_diag(AnalysisWarning warn) {
+    string range = lsp_range(warn.location.line, warn.location.col, warn.location.length);
+    return "{\"range\":" + range + ",\"severity\":2,\"code\":\"Warning\",\"message\":\"" + warn.message + "\"}";
+}
+
+string build_diagnostics_list(list(AnalysisError) errors, list(AnalysisWarning) warnings) {
+    mutable string items = "";
+    mutable int i = 0;
+    while i < errors.len() {
+        if items.len() > 0 { items = items + ","; }
+        items = items + lsp_diagnostic(errors.get(i));
+        i += 1;
+    }
+    i = 0;
+    while i < warnings.len() {
+        if items.len() > 0 { items = items + ","; }
+        items = items + lsp_warning_diag(warnings.get(i));
+        i += 1;
+    }
+    return "[" + items + "]";
+}
+
+void publish_diagnostics(string uri, string source) {
+    ParseResult parsed = parse(source);
+    mutable string diag_list = "[]";
+    if parsed.ok == false {
+        string range = lsp_range(1, 1, 1);
+        string parse_err = "{\"range\":" + range + ",\"severity\":1,\"code\":\"ParseError\",\"message\":\"" + parsed.error + "\"}";
+        diag_list = "[" + parse_err + "]";
+    } else {
+        AnalysisResult ar = analyse(parsed.node, uri);
+        diag_list = build_diagnostics_list(ar.errors, ar.warnings);
+    }
+    string params = "{\"uri\":\"" + uri + "\",\"diagnostics\":" + diag_list + "}";
+    rpc_write(rpc_notification("textDocument/publishDiagnostics", params));
+}

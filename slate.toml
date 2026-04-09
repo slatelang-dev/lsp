@@ -1,5 +1,8 @@
 [project]
-name = "lsp"
+name = "slate-lsp"
 version = "0.1.0"
-description = ""
+description = "Language server for Slate"
 entry = "source/main.slt"
+
+[deps]
+slate = { git = "https://github.com/slatelang-dev/slate" }

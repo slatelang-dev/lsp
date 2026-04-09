@@ -1,3 +1,47 @@
+use slate;
+use protocol;
+use handlers;
+
 void main() {
-    print("Hello, Luma!");
+    mutable string current_uri = "";
+    mutable string current_source = "";
+    mutable bool running = true;
+
+    while running {
+        string raw = rpc_read();
+        if raw == "" {
+            running = false;
+        } else {
+            table(string, string) msg = json(raw).parse();
+            string method = msg.get("method");
+            mutable string id = "";
+            if msg.has("id") {
+                id = msg.get("id");
+            }
+
+            if method == "initialize" {
+                handle_initialize(id);
+            } else if method == "initialized" {
+                handle_initialized();
+            } else if method == "textDocument/didOpen" {
+                string uri = msg.get("params.textDocument.uri");
+                string text = msg.get("params.textDocument.text");
+                current_uri = uri;
+                current_source = text;
+                handle_did_open(uri, text);
+            } else if method == "textDocument/didChange" {
+                string uri = msg.get("params.textDocument.uri");
+                string text = msg.get("params.contentChanges.0.text");
+                current_uri = uri;
+                current_source = text;
+                handle_did_change(uri, text);
+            } else if method == "textDocument/semanticTokens/full" {
+                handle_semantic_tokens(id, current_source);
+            } else if method == "shutdown" {
+                rpc_write(rpc_null(id));
+            } else if method == "exit" {
+                running = false;
+            }
+        }
+    }
 }

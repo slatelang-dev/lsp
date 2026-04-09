@@ -1,0 +1,11 @@
+module document;
+
+use diagnostics;
+
+void handle_did_open(string uri, string text) {
+    publish_diagnostics(uri, text);
+}
+
+void handle_did_change(string uri, string text) {
+    publish_diagnostics(uri, text);
+}

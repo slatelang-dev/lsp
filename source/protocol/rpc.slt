@@ -1,0 +1,44 @@
+module rpc;
+
+string rpc_read() {
+    mutable string header = read();
+    mutable int content_length = 0;
+    mutable bool running = true;
+
+    while running {
+        if header.starts_with("Content-Length: ") {
+            string len_str = header.replace("Content-Length: ", "");
+            content_length = int(len_str);
+        }
+        if header == "" or header == "\r\n" or header == "\r" {
+            running = false;
+        } else {
+            header = read();
+        }
+    }
+
+    if content_length == 0 {
+        return "";
+    }
+
+    return read_n(content_length);
+}
+
+void rpc_write(string body) {
+    string length = string(body.len());
+    write("Content-Length: " + length + "\r\n");
+    write("\r\n");
+    write(body);
+}
+
+string rpc_response(string id, string result) {
+    return "{\"jsonrpc\":\"2.0\",\"id\":" + id + ",\"result\":" + result + "}";
+}
+
+string rpc_notification(string method, string params) {
+    return "{\"jsonrpc\":\"2.0\",\"method\":\"" + method + "\",\"params\":" + params + "}";
+}
+
+string rpc_null(string id) {
+    return "{\"jsonrpc\":\"2.0\",\"id\":" + id + ",\"result\":null}";
+}

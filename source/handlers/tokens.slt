@@ -1,0 +1,65 @@
+module tokens;
+
+use slate;
+use rpc;
+
+int token_type_for(string kind) {
+    if kind == "keyword"  { return 0; }
+    if kind == "string"   { return 1; }
+    if kind == "number"   { return 2; }
+    if kind == "comment"  { return 3; }
+    if kind == "type"     { return 6; }
+    if kind == "operator" { return 7; }
+    return 4;
+}
+
+string kind_to_semantic(string kind) {
+    if kind == "And" or kind == "Or" or kind == "Not"
+    or kind == "If" or kind == "Else" or kind == "For"
+    or kind == "In" or kind == "While" or kind == "Match"
+    or kind == "Return" or kind == "Break" or kind == "True"
+    or kind == "False" or kind == "Void" or kind == "Empty"
+    or kind == "None" or kind == "Some" or kind == "Ok"
+    or kind == "Error" or kind == "Use" or kind == "Module"
+    or kind == "Struct" or kind == "Enum" or kind == "Private"
+    or kind == "Const" or kind == "Mutable" or kind == "Affine" {
+        return "keyword";
+    }
+    if kind == "Int" or kind == "Float" or kind == "String"
+    or kind == "Bool" or kind == "Char" or kind == "List"
+    or kind == "Table" or kind == "Option" or kind == "Result" {
+        return "type";
+    }
+    if kind == "StringLit" or kind == "Interp" { return "string"; }
+    if kind == "IntLit" or kind == "FloatLit"  { return "number"; }
+    if kind == "Ident"                         { return "variable"; }
+    return "operator";
+}
+
+void handle_semantic_tokens(string id, string source) {
+    list(Token) tokens = tokenize(source);
+    mutable string data = "";
+    mutable int prev_line = 0;
+    mutable int prev_col = 0;
+    mutable int i = 0;
+    while i < tokens.len() {
+        Token t = tokens.get(i);
+        string semantic = kind_to_semantic(string(t.kind));
+        int delta_line = t.line - 1 - prev_line;
+        mutable int delta_col = t.col - 1;
+        if delta_line == 0 {
+            delta_col = t.col - 1 - prev_col;
+        }
+        int token_type = token_type_for(semantic);
+        int length = t.value.len();
+        if length > 0 {
+            if data.len() > 0 { data = data + ","; }
+            data = data + string(delta_line) + "," + string(delta_col) + "," + string(length) + "," + string(token_type) + ",0";
+            prev_line = t.line - 1;
+            prev_col = t.col - 1;
+        }
+        i += 1;
+    }
+    string result = "{\"data\":[" + data + "]}";
+    rpc_write(rpc_response(id, result));
+}

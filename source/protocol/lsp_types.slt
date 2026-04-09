@@ -1,0 +1,47 @@
+module lsp_types;
+
+struct Position {
+    int line;
+    int col;
+}
+
+struct Range {
+    Position start;
+    Position end;
+}
+
+struct LspDiagnostic {
+    Range range;
+    int severity;
+    string code;
+    string message;
+}
+
+int severity_error() {
+    return 1;
+}
+
+int severity_warning() {
+    return 2;
+}
+
+int severity_info() {
+    return 3;
+}
+
+int severity_hint() {
+    return 4;
+}
+
+Position make_position(int line, int col) {
+    return Position(line: line, col: col);
+}
+
+Range make_range(Position start, Position end) {
+    return Range(start: start, end: end);
+}
+
+Range make_point_range(int line, int col) {
+    Position pos = make_position(line, col);
+    return Range(start: pos, end: pos);
+}
