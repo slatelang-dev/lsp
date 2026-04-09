@@ -4,3 +4,4 @@ builds/
 # OS
 .DS_Store
 Thumbs.db
+zed-extension/target/

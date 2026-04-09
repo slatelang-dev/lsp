@@ -1,2 +1,0 @@
-cargo:rerun-if-changed=build.rs
-cargo:rustc-env=DEBUG_OUTPUT_DIR=/mnt/Milo/Development/slatelang-dev/lsp/zed-extension/target/debug/build/wit-bindgen-rust-macro-a873cda60dd3fa07/out
