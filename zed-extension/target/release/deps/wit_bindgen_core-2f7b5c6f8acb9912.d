@@ -1,0 +1,10 @@
+/mnt/Milo/Development/slatelang-dev/lsp/zed-extension/target/release/deps/wit_bindgen_core-2f7b5c6f8acb9912.d: /home/dylanisaiahp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wit-bindgen-core-0.22.0/src/lib.rs /home/dylanisaiahp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wit-bindgen-core-0.22.0/src/abi.rs /home/dylanisaiahp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wit-bindgen-core-0.22.0/src/ns.rs /home/dylanisaiahp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wit-bindgen-core-0.22.0/src/source.rs
+
+/mnt/Milo/Development/slatelang-dev/lsp/zed-extension/target/release/deps/libwit_bindgen_core-2f7b5c6f8acb9912.rlib: /home/dylanisaiahp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wit-bindgen-core-0.22.0/src/lib.rs /home/dylanisaiahp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wit-bindgen-core-0.22.0/src/abi.rs /home/dylanisaiahp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wit-bindgen-core-0.22.0/src/ns.rs /home/dylanisaiahp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wit-bindgen-core-0.22.0/src/source.rs
+
+/mnt/Milo/Development/slatelang-dev/lsp/zed-extension/target/release/deps/libwit_bindgen_core-2f7b5c6f8acb9912.rmeta: /home/dylanisaiahp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wit-bindgen-core-0.22.0/src/lib.rs /home/dylanisaiahp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wit-bindgen-core-0.22.0/src/abi.rs /home/dylanisaiahp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wit-bindgen-core-0.22.0/src/ns.rs /home/dylanisaiahp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wit-bindgen-core-0.22.0/src/source.rs
+
+/home/dylanisaiahp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wit-bindgen-core-0.22.0/src/lib.rs:
+/home/dylanisaiahp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wit-bindgen-core-0.22.0/src/abi.rs:
+/home/dylanisaiahp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wit-bindgen-core-0.22.0/src/ns.rs:
+/home/dylanisaiahp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wit-bindgen-core-0.22.0/src/source.rs:

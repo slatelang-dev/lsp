@@ -6,11 +6,12 @@ string rpc_read() {
     mutable bool running = true;
 
     while running {
-        if header.starts_with("Content-Length: ") {
-            string len_str = header.replace("Content-Length: ", "");
+        string clean = header.replace("\r", "");
+        if clean.starts_with("Content-Length: ") {
+            string len_str = clean.replace("Content-Length: ", "");
             content_length = int(len_str);
         }
-        if header == "" or header == "\r\n" or header == "\r" {
+        if clean == "" {
             running = false;
         } else {
             header = read();

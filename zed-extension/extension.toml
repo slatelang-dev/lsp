@@ -1,0 +1,11 @@
+id = "slate"
+name = "Slate"
+version = "0.0.1"
+schema_version = 1
+authors = ["Dylan Isaiah Phillips"]
+description = "Slate language support for Zed"
+repository = "https://github.com/slatelang-dev/lsp"
+
+[language_servers.slate-lsp]
+name = "Slate LSP"
+language = "Slate"

@@ -1,0 +1,21 @@
+name = "Slate"
+grammar = "slate"
+path_suffixes = ["slt"]
+line_comments = ["# "]
+block_comment = ["", ""]
+
+[brackets]
+[[brackets.pair]]
+start = "{"
+end = "}"
+
+[[brackets.pair]]
+start = "("
+end = ")"
+
+[[brackets.pair]]
+start = "["
+end = "]"
+
+[indent_on_paste]
+enabled = true
