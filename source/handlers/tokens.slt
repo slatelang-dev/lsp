@@ -14,25 +14,26 @@ int token_type_for(string kind) {
 }
 
 string kind_to_semantic(string kind) {
-    if kind == "And" or kind == "Or" or kind == "Not"
-    or kind == "If" or kind == "Else" or kind == "For"
-    or kind == "In" or kind == "While" or kind == "Match"
-    or kind == "Return" or kind == "Break" or kind == "True"
-    or kind == "False" or kind == "Void" or kind == "Empty"
-    or kind == "None" or kind == "Some" or kind == "Ok"
-    or kind == "Error" or kind == "Use" or kind == "Module"
-    or kind == "Struct" or kind == "Enum" or kind == "Private"
-    or kind == "Const" or kind == "Mutable" or kind == "Affine" {
+    if kind == "TokenKind::And" or kind == "TokenKind::Or" or kind == "TokenKind::Not"
+    or kind == "TokenKind::If" or kind == "TokenKind::Else" or kind == "TokenKind::For"
+    or kind == "TokenKind::In" or kind == "TokenKind::While" or kind == "TokenKind::Match"
+    or kind == "TokenKind::Return" or kind == "TokenKind::Break" or kind == "TokenKind::True"
+    or kind == "TokenKind::False" or kind == "TokenKind::Void" or kind == "TokenKind::Empty"
+    or kind == "TokenKind::None" or kind == "TokenKind::Some" or kind == "TokenKind::Ok"
+    or kind == "TokenKind::Error" or kind == "TokenKind::Use" or kind == "TokenKind::Module"
+    or kind == "TokenKind::Struct" or kind == "TokenKind::Enum" or kind == "TokenKind::Private"
+    or kind == "TokenKind::Const" or kind == "TokenKind::Mutable" or kind == "TokenKind::Affine" {
         return "keyword";
     }
-    if kind == "Int" or kind == "Float" or kind == "String"
-    or kind == "Bool" or kind == "Char" or kind == "List"
-    or kind == "Table" or kind == "Option" or kind == "Result" {
+    if kind == "TokenKind::Int" or kind == "TokenKind::Float" or kind == "TokenKind::String"
+    or kind == "TokenKind::Bool" or kind == "TokenKind::Char" or kind == "TokenKind::List"
+    or kind == "TokenKind::Table" or kind == "TokenKind::Option" or kind == "TokenKind::Result" {
         return "type";
     }
-    if kind == "StringLit" or kind == "Interp" { return "string"; }
-    if kind == "IntLit" or kind == "FloatLit"  { return "number"; }
-    if kind == "Ident"                         { return "variable"; }
+    if kind == "TokenKind::StringLit" or kind == "TokenKind::Interp" { return "string"; }
+    if kind == "TokenKind::IntLit" or kind == "TokenKind::FloatLit" { return "number"; }
+    if kind == "TokenKind::Ident" { return "variable"; }
+    if kind == "TokenKind::Eof" { return ""; }
     return "operator";
 }
 
@@ -45,20 +46,33 @@ void handle_semantic_tokens(string id, string source) {
     while i < tokens.len() {
         Token t = tokens.get(i);
         string semantic = kind_to_semantic(string(t.kind));
-        int delta_line = t.line - 1 - prev_line;
-        mutable int delta_col = t.col - 1;
-        if delta_line == 0 {
-            delta_col = t.col - 1 - prev_col;
-        }
-        int token_type = token_type_for(semantic);
         int length = t.value.len();
-        if length > 0 {
-            if data.len() > 0 { data = data + ","; }
-            data = data + string(delta_line) + "," + string(delta_col) + "," + string(length) + "," + string(token_type) + ",0";
-            prev_line = t.line - 1;
-            prev_col = t.col - 1;
+        mutable int start_col = 0;
+        mutable int token_length = length;
+        if semantic == "string" {
+            start_col = t.col - 1;
+            token_length = length + 2;
+        } else {
+            start_col = t.col - length;
         }
-        i += 1;
+        int line = t.line - 1;
+        if length <= 0 or semantic == "" or start_col < 0 {
+            i += 1;
+        } else {
+            int delta_line = line - prev_line;
+            mutable int delta_col = start_col;
+            if delta_line == 0 {
+                delta_col = start_col - prev_col;
+            }
+            if delta_col >= 0 {
+                int token_type = token_type_for(semantic);
+                if data.len() > 0 { data = data + ","; }
+                data = data + string(delta_line) + "," + string(delta_col) + "," + string(token_length) + "," + string(token_type) + ",0";
+                prev_line = line;
+                prev_col = start_col;
+            }
+            i += 1;
+        }
     }
     string result = "{\"data\":[" + data + "]}";
     rpc_write(rpc_response(id, result));

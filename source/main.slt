@@ -37,6 +37,8 @@ void main() {
                 handle_did_change(uri, text);
             } else if method == "textDocument/semanticTokens/full" {
                 handle_semantic_tokens(id, current_source);
+            } else if method == "textDocument/semanticTokens/full/delta" {
+                handle_semantic_tokens(id, current_source);
             } else if method == "shutdown" {
                 rpc_write(rpc_null(id));
             } else if method == "exit" {

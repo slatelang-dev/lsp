@@ -3,8 +3,12 @@ module initialize;
 use rpc;
 
 void handle_initialize(string id) {
-    string capabilities = "{\"textDocumentSync\":1,\"semanticTokensProvider\":{\"legend\":{\"tokenTypes\":[\"keyword\",\"string\",\"number\",\"comment\",\"variable\",\"function\",\"type\",\"operator\"],\"tokenModifiers\":[]},\"full\":true}}";
-    string result = "{\"capabilities\":" + capabilities + ",\"serverInfo\":{\"name\":\"slate-lsp\",\"version\":\"0.1.0\"}}";
+    string token_types = "[\"keyword\",\"string\",\"number\",\"comment\",\"variable\",\"function\",\"type\",\"operator\"]";
+    string legend = "{\"tokenTypes\":" + token_types + ",\"tokenModifiers\":[]}";
+    string semantic = "{\"legend\":" + legend + ",\"full\":true}";
+    string capabilities = "{\"textDocumentSync\":1,\"semanticTokensProvider\":" + semantic + "}";
+    string server_info = "{\"name\":\"slate-lsp\",\"version\":\"0.1.0\"}";
+    string result = "{\"capabilities\":" + capabilities + ",\"serverInfo\":" + server_info + "}";
     rpc_write(rpc_response(id, result));
 }
 
