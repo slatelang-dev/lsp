@@ -4,13 +4,14 @@ use slate;
 use rpc;
 
 int token_type_for(string kind) {
-    if kind == "keyword"  { return 0; }
-    if kind == "string"   { return 1; }
-    if kind == "number"   { return 2; }
-    if kind == "comment"  { return 3; }
+    if kind == "keyword"  { return 18; }
+    if kind == "string"   { return 17; }
+    if kind == "number"   { return 19; }
+    if kind == "comment"  { return 16; }
     if kind == "type"     { return 6; }
-    if kind == "operator" { return 7; }
-    return 4;
+    if kind == "operator" { return 21; }
+    if kind == "function" { return 12; }
+    return 8;
 }
 
 string kind_to_semantic(string kind) {

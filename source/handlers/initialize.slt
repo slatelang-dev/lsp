@@ -3,7 +3,7 @@ module initialize;
 use rpc;
 
 void handle_initialize(string id) {
-    string token_types = "[\"keyword\",\"string\",\"number\",\"comment\",\"variable\",\"function\",\"type\",\"operator\"]";
+    string token_types = "[\"namespace\",\"class\",\"enum\",\"interface\",\"struct\",\"typeParameter\",\"type\",\"parameter\",\"variable\",\"property\",\"enumMember\",\"decorator\",\"function\",\"method\",\"macro\",\"label\",\"comment\",\"string\",\"keyword\",\"number\",\"regexp\",\"operator\",\"modifier\",\"event\",\"lifetime\"]";
     string legend = "{\"tokenTypes\":" + token_types + ",\"tokenModifiers\":[]}";
     string semantic = "{\"legend\":" + legend + ",\"full\":true}";
     string capabilities = "{\"textDocumentSync\":1,\"semanticTokensProvider\":" + semantic + "}";
