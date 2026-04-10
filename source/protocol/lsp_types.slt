@@ -11,7 +11,7 @@ struct Range {
 }
 
 struct LspDiagnostic {
-    Range range;
+    Range span;
     int severity;
     string code;
     string message;
