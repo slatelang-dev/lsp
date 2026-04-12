@@ -1,6 +1,7 @@
 use slate;
 use protocol;
 use handlers;
+use rpc;
 
 void main() {
     mutable string current_uri = "";
