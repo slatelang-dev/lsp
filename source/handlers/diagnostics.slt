@@ -40,9 +40,9 @@ string build_diagnostics_list(list(AnalysisError) errors, list(AnalysisWarning) 
 void publish_diagnostics(string uri, string source) {
     ParseResult parsed = parse(source);
     mutable string diag_list = "[]";
-    if parsed.ok == false {
+    if parsed.success == false {
         string range = lsp_range(1, 1, 1);
-        string parse_err = "{\"range\":" + range + ",\"severity\":1,\"code\":\"ParseError\",\"message\":\"" + parsed.error + "\"}";
+        string parse_err = "{\"range\":" + range + ",\"severity\":1,\"code\":\"ParseError\",\"message\":\"" + parsed.message + "\"}";
         diag_list = "[" + parse_err + "]";
     } else {
         AnalysisResult ar = analyse(parsed.node, uri);
