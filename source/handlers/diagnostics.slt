@@ -11,13 +11,13 @@ string lsp_range(int line, int col, int length) {
 }
 
 string lsp_diagnostic(AnalysisError err) {
-    string range = lsp_range(err.location.line, err.location.col, err.location.length);
-    return "{\"range\":" + range + ",\"severity\":1,\"code\":\"Error\",\"message\":\"" + err.message + "\"}";
+    string range_str = lsp_range(err.location.line, err.location.col, err.location.length);
+    return "{\"range\":" + range_str + ",\"severity\":1,\"code\":\"Error\",\"message\":\"" + err.message + "\"}";
 }
 
 string lsp_warning_diag(AnalysisWarning warn) {
-    string range = lsp_range(warn.location.line, warn.location.col, warn.location.length);
-    return "{\"range\":" + range + ",\"severity\":2,\"code\":\"Warning\",\"message\":\"" + warn.message + "\"}";
+    string range_str = lsp_range(warn.location.line, warn.location.col, warn.location.length);
+    return "{\"range\":" + range_str + ",\"severity\":2,\"code\":\"Warning\",\"message\":\"" + warn.message + "\"}";
 }
 
 string build_diagnostics_list(list(AnalysisError) errors, list(AnalysisWarning) warnings) {
@@ -41,8 +41,8 @@ void publish_diagnostics(string uri, string source) {
     ParseResult parsed = parse(source);
     mutable string diag_list = "[]";
     if parsed.success == false {
-        string range = lsp_range(1, 1, 1);
-        string parse_err = "{\"range\":" + range + ",\"severity\":1,\"code\":\"ParseError\",\"message\":\"" + parsed.message + "\"}";
+        string range_str = lsp_range(1, 1, 1);
+        string parse_err = "{\"range\":" + range_str + ",\"severity\":1,\"code\":\"ParseError\",\"message\":\"" + parsed.message + "\"}";
         diag_list = "[" + parse_err + "]";
     } else {
         AnalysisResult ar = analyse(parsed.node, uri);
