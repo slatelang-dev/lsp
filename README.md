@@ -1,3 +1,7 @@
-# lsp
+# Slate Language Server
 
-A Luma project.
+LSP implementation with Zed editor extension.
+
+## Status
+
+In development.
