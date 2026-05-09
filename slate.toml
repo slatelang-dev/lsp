@@ -1,6 +1,6 @@
 [project]
 name = "slate-lsp"
-version = "0.1.0"
+version = "0.2.0"
 description = "Language server for Slate"
 entry = "source/main.slt"
 
