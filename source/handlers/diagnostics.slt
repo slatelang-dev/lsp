@@ -37,6 +37,27 @@ string build_diagnostics_list(list(AnalysisError) errors, list(AnalysisWarning) 
     return "[" + items + "]";
 }
 
+string lsp_normalize_path(string p) {
+    mutable string path = p;
+    while path.contains("//") {
+        path = path.replace("//", "/");
+    }
+    return path;
+}
+
+string lsp_resolve_module_path(string mod_name, string base_path, string home_path) {
+    string local_exports = base_path + "/" + mod_name + "/exports.slt";
+    string local_single = base_path + "/" + mod_name + ".slt";
+    if file(local_exports).exists() { return lsp_normalize_path(local_exports); }
+    if file(local_single).exists() { return lsp_normalize_path(local_single); }
+    string deps_dir = home_path + "/.slate/deps";
+    string deps_exports = deps_dir + "/" + mod_name + "/source/exports.slt";
+    string deps_lib = deps_dir + "/" + mod_name + "/source/lib.slt";
+    if file(deps_exports).exists() { return lsp_normalize_path(deps_exports); }
+    if file(deps_lib).exists() { return lsp_normalize_path(deps_lib); }
+    return lsp_normalize_path(local_exports);
+}
+
 Scope register_module_symbols(Node program, Scope scope) {
     mutable Scope s = scope;
     mutable int i = 0;
@@ -80,7 +101,7 @@ Scope register_transitive(
     while i < program.children.len() {
         Node decl = program.children.get(i);
         if decl.kind == NodeKind.Use {
-            string mod_path = resolve_module_path(decl.value, base_path, home());
+            string mod_path = lsp_resolve_module_path(decl.value, base_path, home());
             if mod_path != "" {
                 if vis.has(mod_path) == false {
                     vis = vis.set(mod_path, 1);
@@ -104,7 +125,7 @@ Scope register_transitive(
                 while j < pr.node.children.len() {
                     Node decl = pr.node.children.get(j);
                     if decl.kind == NodeKind.Use {
-                        string dep_path = resolve_module_path(decl.value, dep_base, home());
+                        string dep_path = lsp_resolve_module_path(decl.value, dep_base, home());
                         if dep_path != "" {
                             if vis.has(dep_path) == false {
                                 vis = vis.set(dep_path, 1);
