@@ -2,6 +2,7 @@ module diagnostics;
 
 use slate;
 use rpc;
+use lsp_types;
 
 string lsp_range(int line, int col, int length) {
     string start_line = string(line - 1);
@@ -12,12 +13,12 @@ string lsp_range(int line, int col, int length) {
 
 string lsp_diagnostic(AnalysisError err) {
     string range_str = lsp_range(err.location.line, err.location.col, err.location.length);
-    return "{\"range\":" + range_str + ",\"severity\":1,\"code\":\"Error\",\"message\":\"" + err.message + "\"}";
+    return "{\"range\":" + range_str + ",\"severity\":" + string(severity_error()) + ",\"code\":\"Error\",\"message\":\"" + err.message + "\"}";
 }
 
 string lsp_warning_diag(AnalysisWarning warn) {
     string range_str = lsp_range(warn.location.line, warn.location.col, warn.location.length);
-    return "{\"range\":" + range_str + ",\"severity\":2,\"code\":\"Warning\",\"message\":\"" + warn.message + "\"}";
+    return "{\"range\":" + range_str + ",\"severity\":" + string(severity_warning()) + ",\"code\":\"Warning\",\"message\":\"" + warn.message + "\"}";
 }
 
 string build_diagnostics_list(list(AnalysisError) errors, list(AnalysisWarning) warnings) {
@@ -148,7 +149,7 @@ void publish_diagnostics(string uri, string source) {
     mutable string diag_list = "[]";
     if parsed.success == false {
         string range_str = lsp_range(1, 1, 1);
-        string parse_err = "{\"range\":" + range_str + ",\"severity\":1,\"code\":\"ParseError\",\"message\":\"" + parsed.message + "\"}";
+        string parse_err = "{\"range\":" + range_str + ",\"severity\":" + string(severity_error()) + ",\"code\":\"ParseError\",\"message\":\"" + parsed.message + "\"}";
         diag_list = "[" + parse_err + "]";
     } else {
         string parent_dir = resolve_parent_dir(uri);
