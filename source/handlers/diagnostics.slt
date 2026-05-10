@@ -37,6 +37,91 @@ string build_diagnostics_list(list(AnalysisError) errors, list(AnalysisWarning) 
     return "[" + items + "]";
 }
 
+Scope register_module_symbols(Node program, Scope scope) {
+    mutable Scope s = scope;
+    mutable int i = 0;
+    while i < program.children.len() {
+        Node decl = program.children.get(i);
+        if decl.kind == NodeKind.FnDecl {
+            Node return_type = decl.children.get(0);
+            Symbol sym = make_fn_symbol(decl.value, return_type.value, decl.line, decl.col);
+            if symbol_exists_in_current_scope(s, decl.value) == false {
+                s = declare_symbol(s, sym);
+            }
+        }
+        if decl.kind == NodeKind.StructDecl {
+            Symbol sym = make_fn_symbol(decl.value, decl.value, decl.line, decl.col);
+            if symbol_exists_in_current_scope(s, decl.value) == false {
+                s = declare_symbol(s, sym);
+            }
+        }
+        if decl.kind == NodeKind.EnumDecl {
+            Symbol sym = make_fn_symbol(decl.value, decl.value, decl.line, decl.col);
+            if symbol_exists_in_current_scope(s, decl.value) == false {
+                s = declare_symbol(s, sym);
+            }
+        }
+        i += 1;
+    }
+    return s;
+}
+
+Scope register_transitive(
+    Node program,
+    string base_path,
+    Scope scope,
+    table(string, int) visited
+) {
+    mutable Scope s = scope;
+    mutable table(string, int) vis = visited;
+    mutable list(string) queue = empty;
+
+    mutable int i = 0;
+    while i < program.children.len() {
+        Node decl = program.children.get(i);
+        if decl.kind == NodeKind.Use {
+            string mod_path = resolve_module_path(decl.value, base_path, home());
+            if mod_path != "" {
+                if vis.has(mod_path) == false {
+                    vis = vis.set(mod_path, 1);
+                    queue = queue.add(mod_path);
+                }
+            }
+        }
+        i += 1;
+    }
+
+    mutable int qi = 0;
+    while qi < queue.len() {
+        string path = queue.get(qi);
+        string source = file(path).read();
+        if source != "" {
+            ParseResult pr = parse(source);
+            if pr.success {
+                s = register_module_symbols(pr.node, s);
+                string dep_base = resolve_parent_dir(path);
+                mutable int j = 0;
+                while j < pr.node.children.len() {
+                    Node decl = pr.node.children.get(j);
+                    if decl.kind == NodeKind.Use {
+                        string dep_path = resolve_module_path(decl.value, dep_base, home());
+                        if dep_path != "" {
+                            if vis.has(dep_path) == false {
+                                vis = vis.set(dep_path, 1);
+                                queue = queue.add(dep_path);
+                            }
+                        }
+                    }
+                    j += 1;
+                }
+            }
+        }
+        qi += 1;
+    }
+
+    return s;
+}
+
 void publish_diagnostics(string uri, string source) {
     ParseResult parsed = parse(source);
     mutable string diag_list = "[]";
@@ -45,7 +130,26 @@ void publish_diagnostics(string uri, string source) {
         string parse_err = "{\"range\":" + range_str + ",\"severity\":1,\"code\":\"ParseError\",\"message\":\"" + parsed.message + "\"}";
         diag_list = "[" + parse_err + "]";
     } else {
-        AnalysisResult ar = analyse(parsed.node, uri);
+        string parent_dir = resolve_parent_dir(uri);
+        mutable string base_path = "source";
+        if parent_dir != "" { base_path = parent_dir; }
+
+        mutable table(string, int) visited = empty;
+        visited = visited.set(uri, 1);
+        mutable Scope scope = seed_builtins(new_scope());
+        scope = register_transitive(parsed.node, base_path, scope, visited);
+        scope = register_module_symbols(parsed.node, scope);
+
+        mutable AnalysisResult ar = analysis_ok();
+        mutable int i = 0;
+        while i < parsed.node.children.len() {
+            Node d = parsed.node.children.get(i);
+            if d.kind == NodeKind.FnDecl {
+                ar = merge_analysis(ar, analyse_fn(d, uri, scope));
+            }
+            i += 1;
+        }
+
         diag_list = build_diagnostics_list(ar.errors, ar.warnings);
     }
     string params = "{\"uri\":\"" + uri + "\",\"diagnostics\":" + diag_list + "}";
