@@ -159,6 +159,7 @@ void publish_diagnostics(string uri, string source) {
         visited = visited.set(uri, 1);
         mutable Scope scope = seed_builtins(new_scope());
         scope = register_transitive(parsed.node, base_path, scope, visited);
+        scope = push_scope(scope);
         scope = register_module_symbols(parsed.node, scope);
 
         mutable AnalysisResult ar = analysis_ok();
