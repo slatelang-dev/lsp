@@ -92,7 +92,8 @@ Scope register_transitive(
     Node program,
     string base_path,
     Scope scope,
-    table(string, int) visited
+    table(string, int) visited,
+    bool debug
 ) {
     mutable Scope s = scope;
     mutable table(string, int) vis = visited;
@@ -159,7 +160,7 @@ void publish_diagnostics(string uri, string source) {
         mutable table(string, int) visited = empty;
         visited = visited.set(uri, 1);
         mutable Scope scope = seed_builtins(new_scope());
-        scope = register_transitive(parsed.node, base_path, scope, visited);
+        scope = register_transitive(parsed.node, base_path, scope, visited, false);
         scope = push_scope(scope);
         scope = register_module_symbols(parsed.node, scope);
 
