@@ -99,11 +99,17 @@ Scope register_transitive(
     mutable table(string, int) vis = visited;
     mutable list(string) queue = empty;
 
+    mutable string abs_base = base_path;
+    if abs_base != "" and abs_base.starts_with("/") == false {
+        string cwd = run("pwd").trim();
+        abs_base = lsp_normalize_path(cwd + "/" + base_path);
+    }
+
     mutable int i = 0;
     while i < program.children.len() {
         Node decl = program.children.get(i);
         if decl.kind == NodeKind.Use {
-            string mod_path = lsp_resolve_module_path(decl.value, base_path, home());
+            string mod_path = lsp_resolve_module_path(decl.value, abs_base, home());
             if mod_path != "" {
                 if vis.has(mod_path) == false {
                     vis = vis.set(mod_path, 1);
@@ -153,12 +159,16 @@ void publish_diagnostics(string uri, string source) {
         string parse_err = "{\"range\":" + range_str + ",\"severity\":" + string(severity_error()) + ",\"code\":\"ParseError\",\"message\":\"" + parsed.message + "\"}";
         diag_list = "[" + parse_err + "]";
     } else {
-        string parent_dir = resolve_parent_dir(uri);
+        mutable string abs_path = uri;
+        if abs_path.starts_with("file://") {
+            abs_path = abs_path.replace("file://", "");
+        }
+        string parent_dir = resolve_parent_dir(abs_path);
         mutable string base_path = "source";
         if parent_dir != "" { base_path = parent_dir; }
 
         mutable table(string, int) visited = empty;
-        visited = visited.set(uri, 1);
+        visited = visited.set(abs_path, 1);
         mutable Scope scope = seed_builtins(new_scope());
         scope = register_transitive(parsed.node, base_path, scope, visited, false);
         scope = push_scope(scope);
@@ -169,7 +179,7 @@ void publish_diagnostics(string uri, string source) {
         while i < parsed.node.children.len() {
             Node d = parsed.node.children.get(i);
             if d.kind == NodeKind.FnDecl {
-                ar = merge_analysis(ar, analyse_fn(d, uri, scope));
+                ar = merge_analysis(ar, analyse_fn(d, abs_path, scope));
             }
             i += 1;
         }
