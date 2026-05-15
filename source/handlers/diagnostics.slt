@@ -73,13 +73,13 @@ Scope lsp_register_module_symbols(Node program, Scope scope) {
             }
         }
         if decl.kind == NodeKind.StructDecl {
-            Symbol sym = make_fn_symbol(decl.value, decl.value, 0, decl.line, decl.col);
+            Symbol sym = make_fn_symbol(decl.value, decl.value, -1, decl.line, decl.col);
             if symbol_exists_in_current_scope(s, decl.value) == false {
                 s = declare_symbol(s, sym);
             }
         }
         if decl.kind == NodeKind.EnumDecl {
-            Symbol sym = make_fn_symbol(decl.value, decl.value, 0, decl.line, decl.col);
+            Symbol sym = make_fn_symbol(decl.value, decl.value, -1, decl.line, decl.col);
             if symbol_exists_in_current_scope(s, decl.value) == false {
                 s = declare_symbol(s, sym);
             }
