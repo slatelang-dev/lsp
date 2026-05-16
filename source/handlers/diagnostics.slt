@@ -59,7 +59,7 @@ string lsp_resolve_module_path(string mod_name, string base_path, string home_pa
     return lsp_normalize_path(local_exports);
 }
 
-Scope lsp_register_module_symbols(Node program, Scope scope) {
+Scope lsp_register_module_symbols(Node program, Scope scope, string mod_file) {
     mutable Scope s = scope;
     mutable int i = 0;
     while i < program.children.len() {
@@ -67,19 +67,19 @@ Scope lsp_register_module_symbols(Node program, Scope scope) {
         if decl.kind == NodeKind.FnDecl {
             Node return_type = decl.children.get(0);
             int param_count = decl.children.len() - 2;
-            Symbol sym = make_fn_symbol(decl.value, return_type.value, param_count, decl.line, decl.col);
+            Symbol sym = make_fn_symbol(decl.value, return_type.value, param_count, decl.line, decl.col, mod_file);
             if symbol_exists_in_current_scope(s, decl.value) == false {
                 s = declare_symbol(s, sym);
             }
         }
         if decl.kind == NodeKind.StructDecl {
-            Symbol sym = make_fn_symbol(decl.value, decl.value, -1, decl.line, decl.col);
+            Symbol sym = make_fn_symbol(decl.value, decl.value, -1, decl.line, decl.col, mod_file);
             if symbol_exists_in_current_scope(s, decl.value) == false {
                 s = declare_symbol(s, sym);
             }
         }
         if decl.kind == NodeKind.EnumDecl {
-            Symbol sym = make_fn_symbol(decl.value, decl.value, -1, decl.line, decl.col);
+            Symbol sym = make_fn_symbol(decl.value, decl.value, -1, decl.line, decl.col, mod_file);
             if symbol_exists_in_current_scope(s, decl.value) == false {
                 s = declare_symbol(s, sym);
             }
@@ -128,7 +128,7 @@ Scope lsp_register_transitive(
         if source != "" {
             ParseResult pr = parse(source);
             if pr.success {
-                s = lsp_register_module_symbols(pr.node, s);
+                s = lsp_register_module_symbols(pr.node, s, path);
                 string dep_base = resolve_parent_dir(path);
                 mutable int j = 0;
                 while j < pr.node.children.len() {
@@ -173,7 +173,7 @@ void publish_diagnostics(string uri, string source) {
         mutable Scope scope = seed_builtins(new_scope());
         scope = lsp_register_transitive(parsed.node, base_path, scope, visited, false);
         scope = push_scope(scope);
-        scope = lsp_register_module_symbols(parsed.node, scope);
+        scope = lsp_register_module_symbols(parsed.node, scope, abs_path);
 
         mutable AnalysisResult ar = analysis_ok();
         mutable int i = 0;
